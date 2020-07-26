@@ -1,9 +1,25 @@
-from django.shortcuts import render,get_object_or_404
-from django.http import HttpResponse,Http404
-from .models import Album,Song
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, Http404
 
 
+from django.views.generic import ListView, DetailView
+from .models import Album, Song
 
+
+class IndexView(ListView):
+    model = Album
+    template_name = 'music/index.html'
+    context_object_name = 'all_albums'
+    # def get_queryset(self):
+    #     return Album.objects.all()
+
+
+class DetailView(DetailView):
+    model = Album
+    template_name = 'music/detail.html'
+
+
+"""
 def index(request):
     context = {'all_albums' : Album.objects.all()}
     return render(request,'music/index.html',context)
@@ -23,8 +39,7 @@ def favorite(request,album_id):
         selected_song.save()
         return render(request,'music/detail.html',{'album' : album})
 
-    
-"""
+
 def detail(request,pk):
     #album = Album.objects.filter(pk=pk).first()
     try:

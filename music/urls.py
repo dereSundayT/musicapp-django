@@ -1,7 +1,7 @@
 from django.urls import path
-from . import views
+from .views import IndexView,DetailView
 urlpatterns = [
-    path('', views.index, name='music-index'),
-    path('<int:pk>/', views.detail, name='music-detail'),
-    path('<int:album_id>/favorite/', views.favorite, name='music-favorite')
+    path('', IndexView.as_view(), name='music-index'),
+    path('<int:pk>/', DetailView.as_view(), name='music-detail'),
+   # path('<int:album_id>/favorite/', views.favorite, name='music-favorite')
 ]

@@ -1,15 +1,18 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth import authenticate, login
 from django.http import HttpResponse, Http404
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, View
+from .forms import UserForm
 from .models import Album, Song
+from django.http import JsonResponse
 
 
 class IndexView(ListView):
     model = Album
     template_name = 'music/index.html'
-    context_object_name = 'all_albums'
+    context_object_name = 'albums'
     # def get_queryset(self):
     #     return Album.objects.all()
 
@@ -32,6 +35,53 @@ class AlbumUpdate(UpdateView):
 class AlbumDelete(DeleteView):
     model = Album
     success_url = reverse_lazy('music-index')
+
+
+class UserFormView(View):
+    form_class = UserForm
+    template_name = 'music/registration_form.html'
+
+    def get(self, request):
+        form = self.form_class(None)
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+            user = form.save(commit=False)
+            # clean normalize data
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user.set_password(password)
+            user.save()
+            # return  User Objects  if credentaila are correct
+            user = authenticate(username=username, password=password)
+
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return redirect('music-index')
+        return render(request, self.template_name, {'form': form})
+
+
+def createSong(request, album_id):
+    context = {'album': Album.objects.get(pk=album_id)}
+    return render(request, 'music/create_song.html', context)
+
+
+def favorite_album(request, album_id):
+    album = get_object_or_404(Album, pk=album_id)
+    try:
+        if album.is_favorite:
+            album.is_favorite = False
+        else:
+            album.is_favorite = True
+        album.save()
+    except (KeyError, Album.DoesNotExist):
+        return JsonResponse({'success': False})
+    else:
+        return JsonResponse({'success': True})
 
 
 """

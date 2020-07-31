@@ -4,6 +4,7 @@ from .views import IndexView, DetailView, AlbumCreate, AlbumUpdate, AlbumDelete,
 urlpatterns = [
     path('', IndexView.as_view(), name='music-index'),
     path('register/', UserFormView.as_view(), name='music-register'),
+    
     path('<int:pk>/', DetailView.as_view(), name='music-detail'),
     path('album/add/add/', AlbumCreate.as_view(), name='music-album-add'),
     path('album/<int:pk>/', AlbumUpdate.as_view(), name='music-album-update'),
